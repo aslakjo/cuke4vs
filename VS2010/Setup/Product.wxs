@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="Cucumber Language Service (VS 2010)" Language="1033" Version="0.2.6" Manufacturer="Henri ter Steeg" UpgradeCode="4A263005-A34C-4410-8B39-A82D08D7A0A9">
+    <Package InstallerVersion="200" Compressed="yes" />
+
+    <Media Id="1" Cabinet="data.cab" EmbedCab="yes" />
+
+    <!-- Upgrade support -->
+    <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="4A263005-A34C-4410-8B39-A82D08D7A0A9">
+      <UpgradeVersion Minimum="0.0.0" Maximum="0.2.6" Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="no" />
+    </Upgrade>
+    <!-- end upgrade support -->
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="Cucumber.net" Name="Cucumber.net">
+          <Directory Id="INSTALLLOCATION" Name="Cucumber Language Service (VS 2010)">
+            <Component Id="ComponentPath" Guid="EC736042-6E7E-4db4-889F-2375E4EA0D5F">
+              <!-- Install core files here -->
+              <File Id="File_CucumberLanguageService.dll" Source="$(var.PROJECTOUTPUT)/CucumberLanguageService.dll"/>
+              <File Id="File_Irony.dll" Source="$(var.PROJECTOUTPUT)/Irony.dll"/>
+              <File Id="File_Cucumber.ico" Source="Cucumber.ico"/>
+              <?include $(var.PROJECTOUTPUT)/CucumberLanguageService.wxi ?>
+            </Component>
+
+            <!-- Cucumber file associations -->
+            <Component Id="AssociateCucumberFiles" Guid="9651BDF3-96C3-4e0c-BB42-0A6AC9B8B218">
+              <ProgId Id="CucumberScript.feature" Description="Cucumber script">
+                <Extension Id="Cucumber" ContentType='application/text'>
+                  <Verb Id="open" TargetProperty="VS2010DEVENV" Command="Open" Argument='/edit "%1"' />
+                </Extension>
+              </ProgId>
+              <Registry Id='CucumberIcon1' Root='HKCR' Key='.feature' Action='write'
+  Type='string' Value='Cucumber.feature' />
+              <Registry Id='CucumberIcon2' Root='HKCR' Key='Cucumber.feature' Action='write'
+                Type='string' Value='Cucumber script' />
+              <Registry Id='CucumberIcon3' Root='HKCR' Key='Cucumber.feature\DefaultIcon' Action='write'
+  Type='string' Value='[INSTALLLOCATION]Cucumber.ico' />
+            </Component>
+
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="VS2010_ROOT_FOLDER">
+        <Directory Id="Common7" Name="Common7">
+          <Directory Id="IDE" Name="IDE">
+            <Directory Id="ItemTemplates" Name="ItemTemplates">
+              <Directory Id="CSharp" Name="CSharp">
+                <Directory Id="X1033" Name="1033">
+                  <Component Id="VS2010CSharpItemsComponent" Guid="362BCED2-E703-4318-A058-7C076BB12FF2">
+                    <File Id="CSharpZip" Source="$(var.OUTPUTDIR)\Cucumber.zip" />
+                  </Component>
+                </Directory>
+                <Directory Id="General" Name="General">
+                  <Directory Id="C1033" Name="1033">
+                    <Component Id="VS2010ScriptItemsComponent" Guid="F9969D0B-69C5-4298-B5D4-2FF939BF49ED">
+                      <File Id="GeneralZip" Source="$(var.OUTPUTDIR)\Cucumber.zip" />
+                    </Component>
+                  </Directory>
+                </Directory>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <Feature Id="ProductFeature" Title="Cucumber Editor for Visual Studio 2010" Level="1" AllowAdvertise="no" Absent="disallow">
+      <ComponentRef Id="ComponentPath" />
+      <ComponentRef Id="VS2010CSharpItemsComponent"/>
+      <ComponentRef Id="VS2010ScriptItemsComponent"/>
+    </Feature>
+    <Feature Id="AssociateCucumberFiles" Title="Associate Cucumber Files" Description="Associate Cucumber files with Visual Studio" Level="1" AllowAdvertise="no">
+      <ComponentRef Id="AssociateCucumberFiles"/>
+    </Feature>
+
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
+    <PropertyRef Id="VS2010_ROOT_FOLDER" />
+    <CustomActionRef Id="VS2010Setup"/>
+    <UIRef Id="WixUI_FeatureTree" />
+    <Icon Id="Cucumber.ico" SourceFile="Cucumber.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="Cucumber.ico" />
+    <InstallExecuteSequence>
+      <RemoveExistingProducts Before="InstallInitialize" />
+      <Custom Action="VS2010Setup" After="InstallFiles"/>
+    </InstallExecuteSequence>
+  </Product>
+</Wix>
